@@ -54,6 +54,7 @@ app.post('/', async (req, res) => {
         - If a section is not applicable, leave it blank but keep the tags.
         - Do not explain what you did; just return the XML.
         - Do not add extra commentary, greetings, or apologies.
+        - Ensure You do not skip any of the users Important provided context in the code in your output, Dont skip it for brevity
         
         Below is an example. If the user requests: "Write an essay about the importance of clean energy", you might return:
         
