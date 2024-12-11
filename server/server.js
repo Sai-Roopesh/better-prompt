@@ -33,26 +33,41 @@ app.post('/', async (req, res) => {
 
     try {
         const client = new ModelClient(endpoint, new AzureKeyCredential(token));
-
         const response = await client.path("/chat/completions").post({
             body: {
                 messages: [
                     {
-                        role: "system", 
-                        content: `You are a helpful assistant that enhances user prompts. The improved prompt should use XML-like tags to structure the content more clearly for better processing. 
-                        Always return the improved prompt with the following format:
-
-                        <Prompt>
-                            <Context> Provide context if necessary </Context>
-                            <Task> Describe the task clearly </Task>
-                            <Details> Include any specific instructions or details </Details>
-                        </Prompt>
-
-                        Please avoid using phrases like "Sure! Here’s a refined prompt". Just return the enhanced prompt directly.`
+                        role: "system",
+                        content: `You are a helpful assistant that refines user prompts. 
+        Your task is to take a user prompt and transform it into a well-structured XML-format prompt to help guide a model more effectively. 
+        Always return the improved prompt in the following strict XML format:
+        
+        <Prompt>
+            <Context>Provide any contextual information needed. If none, leave empty.</Context>
+            <Task>State the task the user wants done.</Task>
+            <Details>Include any special instructions, formatting details, constraints, or other specifics. If none, leave empty.</Details>
+        </Prompt>
+        
+        Important rules:
+        - Do not include any text outside the <Prompt>...</Prompt> tags.
+        - Use exactly these three child elements: <Context>, <Task>, <Details>.
+        - If a section is not applicable, leave it blank but keep the tags.
+        - Do not explain what you did; just return the XML.
+        - Do not add extra commentary, greetings, or apologies.
+        
+        Below is an example. If the user requests: "Write an essay about the importance of clean energy", you might return:
+        
+        <Prompt>
+            <Context>None</Context>
+            <Task>Write an essay about the importance of clean energy</Task>
+            <Details>Ensure the essay is about 500 words, focused on environmental benefits</Details>
+        </Prompt>
+        
+        Follow these instructions for every user prompt.`
                     },
-                    { 
-                        role: "user", 
-                        content: `give better prompt: ${prompt}`
+                    {
+                        role: "user",
+                        content: `Refine my prompt: ${prompt}`
                     }
                 ],
                 model: modelName,
@@ -61,6 +76,7 @@ app.post('/', async (req, res) => {
                 top_p: 1.0
             }
         });
+        
 
         if (response.status !== "200") {
             throw response.body.error;
