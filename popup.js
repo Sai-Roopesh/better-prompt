@@ -32,13 +32,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             // Fetch improved prompt from backend
-            const response = await fetch('https://better-prompt.onrender.com', {
+            const response = await fetch('https://better-prompt.onrender.com/', { // Ensure the trailing slash is present
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ prompt })
             });
+
+            // Log the response status
+            console.log(`Response Status: ${response.status}`);
 
             // Handle response
             if (response.ok) {
@@ -52,7 +55,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error("Invalid response format.");
                 }
             } else {
-                showErrorMessage(`Failed to generate prompt. Status: ${response.status}`);
+                // Attempt to parse error message from response
+                let errorMsg = `Failed to generate prompt. Status: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    if (errorData.error) {
+                        errorMsg += ` - ${errorData.error}`;
+                    }
+                } catch (e) {
+                    // If response is not JSON
+                }
+                showErrorMessage(errorMsg);
             }
         } catch (error) {
             showErrorMessage(`Error: ${error.message}`);
